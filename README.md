@@ -2,6 +2,8 @@
 
 Equivariant Transformer (ET) layers are image-to-image mappings that incorporate prior knowledge on invariances with respect to continuous transformations of images.
 
+More details can be found in the paper: https://arxiv.org/abs/1901.11399
+
 ## Requirements
 
 - python >=3.6
