@@ -38,9 +38,15 @@ class SVHNModel(Model):
                  seed=None,
                  load_path=None):
         """SVHN model"""
+        tf_opts_copy = dict(self.tf_default_opts)
+        tf_opts_copy.update(tf_opts)
+            
+        net_opts_copy = dict(self.net_default_opts)
+        net_opts_copy.update(net_opts)
+        
         super().__init__(tfs=tfs, coords=coords, net=net, 
-                         equivariant=equivariant, tf_opts=tf_opts,
-                         net_opts=net_opts, seed=seed, load_path=load_path)
+                         equivariant=equivariant, tf_opts=tf_opts_copy,
+                         net_opts=net_opts_copy, seed=seed, load_path=load_path)
         
     def __str__(self):
         return "Street View House Numbers classification (single-digit)"
