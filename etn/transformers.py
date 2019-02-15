@@ -140,7 +140,6 @@ class Transformer(nn.Module):
         if grid_size is None:
             grid_size = x.shape[-2:]
         
-        # a grid is a .....
         grid = self.coords(grid_size, ulim=self.ulim, vlim=self.vlim, device=x.device)
         grid = grid.unsqueeze(0).expand(x.shape[0], -1, -1, -1)
         if transform is not None:

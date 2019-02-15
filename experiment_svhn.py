@@ -10,6 +10,7 @@ from etn import coordinates, networks, transformers
 
 
 class SVHNModel(Model):
+    # transformer defaults
     tf_default_opts = {
         'in_channels': 3,
         'kernel_size': 3, 
@@ -17,12 +18,27 @@ class SVHNModel(Model):
         'strides': (1, 1),
     }
     
+    # classification network defaults
     net_default_opts = {
         'nf': 32, 
         'p_dropout': 0.3, 
         'pad_mode': ('constant', 'constant'), 
     }
     
+    # optimizer defaults
+    optimizer_default_opts = {
+        'amsgrad': True,
+        'lr': 2e-3,
+        'weight_decay': 0.,
+    }
+    
+    # learning rate schedule defaults
+    lr_default_schedule = {
+        'step_size': 1,
+        'gamma': 0.99,
+    }
+    
+    # dataset mean and standard deviation
     normalization_mean = torch.FloatTensor([0.4379, 0.4440, 0.4729])
     normalization_std = torch.FloatTensor([0.1981, 0.2010, 0.1970])
     
@@ -59,14 +75,20 @@ class SVHNModel(Model):
     def train(self, 
               num_epochs=300,
               batch_size=128, 
-              optimizer_opts={'amsgrad': True, 'lr': 2e-3, 'weight_decay': 0.},
-              lr_schedule={'step_size': 1, 'gamma': 0.99},
+              optimizer_opts=optimizer_default_opts,
+              lr_schedule=lr_default_schedule,
               **kwargs):
+        optimizer_opts_copy = dict(self.optimizer_default_opts)
+        optimizer_opts_copy.update(optimizer_opts)
+        
+        lr_schedule_copy = dict(self.lr_default_schedule)
+        lr_schedule_copy.update(lr_schedule)
+        
         super().train(
             num_epochs=num_epochs, 
             batch_size=batch_size, 
-            optimizer_opts=optimizer_opts, 
-            lr_schedule=lr_schedule,
+            optimizer_opts=optimizer_opts_copy, 
+            lr_schedule=lr_schedule_copy,
             **kwargs)
 
         

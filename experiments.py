@@ -225,6 +225,22 @@ class Model(object):
         logging.info('Test error = %.4f' % err_rate)
         return loss, err_rate
     
+    def predict(self, input, device='cuda:0', tf_output=False):
+        """Predict a distribution over labels for a single example."""
+        self.model.eval()
+        self.model.to(device)
+        x = input.to(device)
+        if x.dim() == 3:
+            x = x.unsqueeze(0)
+        with torch.no_grad():
+            out = self.model(x, tf_output=tf_output)
+            logits = out[0] if tf_output else out
+            probs = F.softmax(logits.squeeze(0), dim=-1)
+            if tf_output:
+                return probs, out[1]
+            else:
+                return probs
+    
     def _train(self, optim, scheduler, loader, device):
         self.model.train()
         losses = []
@@ -255,21 +271,10 @@ class Model(object):
         loss = total_loss / count
         err_rate = total_err / count
         return loss, err_rate
-    
-    def visualize(self, device='cpu'):
-        """
-        """
-        # TODO
-        # make a plot
-        self.model.to(device)
-        self.model.eval()
-        return self
 
     
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, path, num_examples=None, normalization=None):
-        """
-        """
         self.path = path
         self.normalization = normalization      
         self.data, self.targets = torch.load(self.path)
@@ -295,6 +300,7 @@ class Dataset(torch.utils.data.Dataset):
     
 class Plotter(object):
     def __init__(self, id_string='', width=12, height=2.5, show_plot=True):
+        """A dynamic plotting widget for tracking training progress in notebooks."""
         self.id_string = id_string
         self.width = width
         self.height = height
@@ -348,70 +354,5 @@ class Plotter(object):
             ax.set_title(k)
         plt.tight_layout(rect=[0, 0.03, 1, 0.95])
         return fig
-    
-
-def visualize_transformation(x, sequence, device='cpu', figsize=(5, 4), rerun=False, mean=None, std=None):
-    """
-    Args:
-    """
-    def tensor_to_numpy(x):
-        x = x.squeeze().cpu()
-        if x.dim() == 3:
-            x = x.permute(1, 2, 0)
-        if std is not None:
-            x = x.mul(std)
-        if mean is not None:
-            x = x.add(mean)
-        return x.numpy()
-    
-    sequence.eval()
-    plt.imshow(tensor_to_numpy(x))
-    plt.show()
-    
-    if x.dim() == 3:
-        x = x.unsqueeze(0)
-    x = x.to(device)
-    with torch.no_grad():
-        out_dict = sequence(x)
-        for transform, param, heatmap, module in zip(
-            out_dict['transform'], 
-            out_dict['params'], 
-            out_dict['maps'], 
-            sequence.proj_modules):
-            
-            print(type(module).__name__)
-            param = [p.item() for p in param]
-            print(param)
-            
-            grid = transform(coordinates.identity_grid(x.shape[-2:]).unsqueeze(0))
-            x_resampled = F.grid_sample(x, grid)
-            
-            # rerun the transformer module on the resampled output
-            if rerun:
-                out_re = module(x_resampled)
-                heatmap_re = out_re['maps']
-                print([p.item() for p in out_re['params']])
-        
-            if heatmap is None:
-                plt.figure(figsize=figsize)
-                plt.imshow(x_resampled.squeeze().cpu().numpy())
-            else:
-                if type(heatmap) is tuple:
-                    # two parameters
-                    f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(figsize[0]*3 + 2, figsize[1]))
-                    ax2.plot(heatmap[0].squeeze().cpu().numpy())
-                    ax3.plot(heatmap[1].squeeze().cpu().numpy())
-                    if rerun:
-                        ax2.plot(heatmap_re[0].squeeze().cpu().numpy())
-                        ax3.plot(heatmap_re[1].squeeze().cpu().numpy())
-                else:
-                    # one parameter
-                    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(figsize[0]*2 + 1, figsize[1]))
-                    ax2.plot(heatmap.squeeze().cpu().numpy())
-                    if rerun:
-                        ax2.plot(heatmap_re.squeeze().cpu().numpy())
-                ax1.imshow(tensor_to_numpy(x_resampled))
-                
-            plt.show()
 
         

@@ -10,6 +10,7 @@ from etn import coordinates, networks, transformers
 
 
 class MNISTModel(Model):
+    # transformer defaults
     tf_default_opts = {
         'in_channels': 1, 
         'kernel_size': 3, 
@@ -17,6 +18,7 @@ class MNISTModel(Model):
         'strides': (2, 1),
     }
     
+    # classification network defaults
     net_default_opts = {
         'nf': 32, 
         'p_dropout': 0.3, 
@@ -24,6 +26,20 @@ class MNISTModel(Model):
         'pool': (True, True, False),
     }
     
+    # optimizer defaults
+    optimizer_default_opts = {
+        'amsgrad': True,
+        'lr': 2e-3,
+        'weight_decay': 0.,
+    }
+    
+    # learning rate schedule defaults
+    lr_default_schedule = {
+        'step_size': 1,
+        'gamma': 0.99,
+    }
+    
+    # dataset mean and standard deviation
     normalization_mean = torch.Tensor([16.2884])
     normalization_std = torch.Tensor([56.2673])
     
@@ -61,14 +77,20 @@ class MNISTModel(Model):
     def train(self, 
               num_epochs=300,
               batch_size=128, 
-              optimizer_opts={'amsgrad': True, 'lr': 2e-3, 'weight_decay': 0.},
-              lr_schedule={'step_size': 1, 'gamma': 0.99},
+              optimizer_opts=optimizer_default_opts,
+              lr_schedule=lr_default_schedule,
               **kwargs):
+        optimizer_opts_copy = dict(self.optimizer_default_opts)
+        optimizer_opts_copy.update(optimizer_opts)
+        
+        lr_schedule_copy = dict(self.lr_default_schedule)
+        lr_schedule_copy.update(lr_schedule)
+        
         super().train(
             num_epochs=num_epochs, 
             batch_size=batch_size, 
-            optimizer_opts=optimizer_opts, 
-            lr_schedule=lr_schedule,
+            optimizer_opts=optimizer_opts_copy, 
+            lr_schedule=lr_schedule_copy,
             **kwargs)
 
 

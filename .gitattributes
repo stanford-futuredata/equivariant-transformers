@@ -1,0 +1,2 @@
+pretrained/etn-projmnist-8x.pt filter=lfs diff=lfs merge=lfs -text
+pretrained/etn-resnet34-svhn.pt filter=lfs diff=lfs merge=lfs -text

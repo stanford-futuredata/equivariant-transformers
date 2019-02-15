@@ -20,7 +20,7 @@ class TransformerCNN(nn.Module):
         self.coords = coords
         self.downsample = downsample
     
-    def forward(self, x):
+    def forward(self, x, tf_output=False):
         grid_size = (x.shape[-2]//self.downsample, x.shape[-1]//self.downsample)
         grid = self.coords(grid_size, device=x.device)
         grid = grid.unsqueeze(0).expand(x.shape[0], -1, -1, -1)
@@ -30,28 +30,16 @@ class TransformerCNN(nn.Module):
             if type(transform) is list:
                 transform = transform[-1]
             grid = transform(grid)
+        else:
+            tf_out = None
         
         out = F.grid_sample(x, grid)
         out = self.net(out)
-        return out
-    
-    
-class SiameseNetwork(nn.Module):
-    def __init__(self, net, normalize=True, bias=True):
-        super().__init__()
-        self.net = net
-        self.normalize = normalize
-        self.bias = nn.Parameter(torch.tensor(0.)) if bias else None
         
-    def forward(self, x1, x2):
-        n = x1.shape[0]
-        z = self.net(torch.cat([x1, x2]))
-        if self.normalize:
-            z = z.div(torch.norm(z, dim=-1, keepdim=True))
-        logits = torch.bmm(z[:n].unsqueeze(1), z[n:].unsqueeze(2)).view(-1)
-        if self.bias is not None:
-            logits = logits + self.bias
-        return logits
+        if tf_output:
+            return out, tf_out
+        else:
+            return out
     
     
 # =================================================================================
