@@ -65,6 +65,7 @@ class Model(object):
             pose_module = networks.EquivariantPosePredictor if equivariant else networks.DirectPosePredictor
             tfs = [getattr(transformers, tf) if type(tf) is str else tf for tf in tfs]
             seq = transformers.TransformerSequence(*[tf(pose_module, **tf_opts) for tf in tfs])
+            #seq = transformers.TransformerParallel(*[tf(pose_module, **tf_opts) for tf in tfs])
             logging.info('Transformers: %s' % ' -> '.join([tf.__name__ for tf in tfs]))
             logging.info('Pose module: %s' % pose_module.__name__)
         else:

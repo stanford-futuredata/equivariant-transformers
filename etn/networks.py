@@ -11,7 +11,7 @@ from .coordinates import identity_grid
 import matplotlib.pyplot as plt
 
 class TransformerCNN(nn.Module):
-    def __init__(self, net, transformer=None, coords=identity_grid, downsample=1):
+    def __init__(self, net, transformer=None, coords=identity_grid, downsample=1, grid_size_tf=None, ulim=None, vlim=None):
         """
         """
         super().__init__()
@@ -19,13 +19,24 @@ class TransformerCNN(nn.Module):
         self.net = net
         self.coords = coords
         self.downsample = downsample
+        self.grid_size_tf = grid_size_tf
+        self.ulim = ulim
+        self.vlim = vlim
     
     def forward(self, x, tf_output=False):
         grid_size = (x.shape[-2]//self.downsample, x.shape[-1]//self.downsample)
-        grid = self.coords(grid_size, device=x.device)
+        grid_size_tf = self.grid_size_tf
+        if grid_size_tf is None:
+            grid_size_tf = x.shape[-2:]
+        
+        if self.ulim is not None and self.vlim is not None:
+            grid = self.coords(grid_size, device=x.device, ulim=self.ulim, vlim=self.vlim)
+        else:
+            grid = self.coords(grid_size, device=x.device)
         grid = grid.unsqueeze(0).expand(x.shape[0], -1, -1, -1)
+        
         if self.transformer is not None:
-            tf_out = self.transformer(x, grid_size=grid_size)
+            tf_out = self.transformer(x, grid_size=grid_size_tf)
             transform = tf_out['transform']
             if type(transform) is list:
                 transform = transform[-1]

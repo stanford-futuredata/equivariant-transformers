@@ -186,7 +186,7 @@ class TransformerSequence(nn.Module):
         """A container class representing a sequence of Transformer modules to be applied iteratively.
         
         Args:
-            modules: a sequence of Transformer modules.
+            transformers: a sequence of Transformer modules.
         """
         super().__init__()
         self.transformers = nn.ModuleList(transformers)
@@ -203,6 +203,39 @@ class TransformerSequence(nn.Module):
             transforms.append(transform)
             params.append(out_dict['params'])
             heatmaps.append(out_dict['maps'])
+            
+        return {
+            'transform': transforms,
+            'params': params,
+            'maps': heatmaps,
+        }
+    
+
+class TransformerParallel(nn.Module):
+    def __init__(self, *transformers):
+        """A container class representing a sequence of Transformer modules to be applied in parallel.
+        
+        Args:
+            transformers: a sequence of Transformer modules.
+        """
+        super().__init__()
+        self.transformers = nn.ModuleList(transformers)
+
+    def forward(self, x, transform=None, grid_size=None, padding_mode='zeros'):            
+        params = []
+        heatmaps = []
+        par_transforms = []
+        
+        # fold over projective modules
+        for i, tf in enumerate(self.transformers):
+            out_dict = tf(x, transform=transform, grid_size=grid_size, padding_mode=padding_mode)
+            par_transforms.append(out_dict['transform'])
+            params.append(out_dict['params'])
+            heatmaps.append(out_dict['maps'])
+        
+        transforms = [par_transforms[0]]
+        for tf in par_transforms[1:]:
+            transforms.append(transforms[-1].compose(tf))
             
         return {
             'transform': transforms,
