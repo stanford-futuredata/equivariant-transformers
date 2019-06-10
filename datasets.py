@@ -48,7 +48,6 @@ class Preprocessor(object):
         for i, idx in tqdm(enumerate(train_idxs)):
             img, y = mnist_train[idx]
             img = img.convert(mode='F')
-            y = y.item()
             for j in range(copies):    
                 params = train_params[j*len(train_idxs) + i]
                 timg = projective(img, canvas=(output_size, output_size), **params)
@@ -66,7 +65,6 @@ class Preprocessor(object):
             img, y = mnist_train[idx]
             img = img.convert(mode='F')
             timg = projective(img, canvas=(output_size, output_size), **valid_params[i])
-            y = y.item()
             valid_data[i] = torch.FloatTensor(np.array(timg)).clamp_(0., 255.)
             valid_labels[i] = y
             
@@ -80,7 +78,6 @@ class Preprocessor(object):
         for idx in tqdm(range(len(mnist_test))):
             img, y = mnist_test[idx]
             img = img.convert(mode='F')
-            y = y.item()
             for j in range(copies):
                 params = test_params[j*len(mnist_test) + idx]
                 timg = projective(img, canvas=(output_size, output_size), **params)

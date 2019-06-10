@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from etn import coordinates
 
 
-def visualize_transformation(x, model, device='cpu', figsize=(4, 3)):
+def visualize_transformation(x, model, device='cpu', figsize=(4, 3), cmap=None):
     def tensor_to_numpy(x):
         x = x.squeeze().cpu()
         if x.dim() == 3:
@@ -15,7 +15,7 @@ def visualize_transformation(x, model, device='cpu', figsize=(4, 3)):
         return x.numpy()
     
     plt.figure(figsize=figsize)
-    plt.imshow(tensor_to_numpy(x))
+    plt.imshow(tensor_to_numpy(x), cmap=cmap)
     plt.title('input')
     plt.show()
     
@@ -63,8 +63,8 @@ def visualize_transformation(x, model, device='cpu', figsize=(4, 3)):
                 hm1.set_title('transformer feature map')
                 hm1.grid(True)
                 
-            ax1.imshow(tensor_to_numpy(x_in))
-            ax2.imshow(tensor_to_numpy(x_out))
+            ax1.imshow(tensor_to_numpy(x_in), cmap=cmap)
+            ax2.imshow(tensor_to_numpy(x_out), cmap=cmap)
             ax1.set_title('transformer input in canonical coordinates')
             ax2.set_title('transformer output')
             prev_transform = transform
@@ -74,7 +74,7 @@ def visualize_transformation(x, model, device='cpu', figsize=(4, 3)):
         grid = prev_transform(grid.unsqueeze(0))
         x_in = F.grid_sample(x, grid)
         f = plt.figure(figsize=figsize)
-        plt.imshow(tensor_to_numpy(x_in))
+        plt.imshow(tensor_to_numpy(x_in), cmap=cmap)
         plt.title('output after final coordinate transformation')
         plt.show()
         

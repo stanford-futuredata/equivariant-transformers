@@ -3,7 +3,7 @@
 Equivariant Transformer (ET) layers are image-to-image mappings that incorporate prior knowledge on invariances with respect to continuous transformation groups.
 ET layers can be used to normalize the appearance of images prior to classification (or other operations) by a convolutional neural network.
 
-More details can be found in our preprint: https://arxiv.org/abs/1901.11399
+More details can be found in our ICML 2019 paper: https://arxiv.org/abs/1901.11399.
 
 <p align="center">
   <img align="middle" src="./assets/predicted-transformations.png" alt="Predicted transformations" width="500" />
@@ -44,6 +44,22 @@ These files will be used by the experiment scripts.
 
 ---
 
+## Pretrained Models
+
+Pretrained models can be found in the `pretrained` directory.
+
+These can be loaded by simply setting the `load_path` argument for the corresponding `Model` subclass:
+
+```
+from experiment_mnist import MNISTModel
+from experiment_svhn import SVHNModel
+
+mnist_model = MNISTModel(load_path='pretrained/etn-projmnist-8x.pt')
+svhn_model = SVHNModel(load_path='pretrained/etn-resnet34-svhn.pt')
+```
+
+---
+
 ## Usage
 
 There are two scripts for running the experiments described in the paper: `experiment_mnist.py` and `experiment_svhn.py`.
@@ -60,7 +76,7 @@ The `save_path` flag lets us specify a path to save the model that achieves the 
 To change the set of transformers used by the model, we can use the `tfs` flag to specify a list of class names from the `etn.transformers` module. For example:
 
 ```
-python experiment_mnist.py train ... --tfs [ShearX, HyperbolicRotation]
+python experiment_mnist.py train ... --tfs "[ShearX, HyperbolicRotation]"
 ```
 
 To train a model without any transformers, we can simply set `tfs` to the empty list `[]`:
@@ -115,18 +131,3 @@ model.train(..., show_plot=True, ...)
 
 For more training options, see the `__init__` and `train` functions for the base `experiments.Model` class and its subclasses in `experiment_mnist` and `experiment_svhn`.
 
----
-
-## Pretrained Models
-
-Pretrained models can be found in the `pretrained` directory.
-
-These can be loaded by simply setting the `load_path` argument for the corresponding `Model` subclass:
-
-```
-from experiment_mnist import MNISTModel
-from experiment_svhn import SVHNModel
-
-mnist_model = MNISTModel(load_path='pretrained/etn-projmnist-8x.pt')
-svhn_model = SVHNModel(load_path='pretrained/etn-resnet34-svhn.pt')
-```

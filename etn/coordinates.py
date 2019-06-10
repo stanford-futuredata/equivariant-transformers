@@ -1,5 +1,7 @@
 """
-Sampling grids for canonical coordinate systems.
+Sampling grids for 2D canonical coordinate systems.
+Each coordinate system is defined by a pair of coordinates u, v. 
+Each grid function maps from a grid in (u, v) coordinates to a collection points in Cartesian coordinates.
 """
 
 import numpy as np
@@ -7,6 +9,19 @@ import torch
 
 
 def identity_grid(output_size, ulim=(-1, 1), vlim=(-1, 1), out=None, device=None):
+    """Cartesian coordinate system.
+    
+    Args:
+        output_size: (int, int), number of sampled values for the v-coordinate and u-coordinate respectively
+        ulim: (float, float), Cartesian x-coordinate limits
+        vlim: (float, float), Cartesian y-coordinate limits
+        out: torch.FloatTensor, output tensor
+        device: string or torch.device, device for torch.tensor
+        
+    Returns:
+        torch.FloatTensor, shape (output_size[0], output_size[1], 2), tensor where entry (i,j) gives the
+        (x, y)-coordinates of the grid point.
+    """
     nv, nu = output_size
     urange = torch.linspace(ulim[0], ulim[1], nu, device=device)
     vrange = torch.linspace(vlim[0], vlim[1], nv, device=device)
@@ -17,6 +32,19 @@ def identity_grid(output_size, ulim=(-1, 1), vlim=(-1, 1), out=None, device=None
 
 
 def polar_grid(output_size, ulim=(0, np.sqrt(2.)), vlim=(-np.pi, np.pi), out=None, device=None):
+    """Polar coordinate system.
+    
+    Args:
+        output_size: (int, int), number of sampled values for the v-coordinate and u-coordinate respectively
+        ulim: (float, float), radial coordinate limits
+        vlim: (float, float), angular coordinate limits
+        out: torch.FloatTensor, output tensor
+        device: string or torch.device, device for torch.tensor
+        
+    Returns:
+        torch.FloatTensor, shape (output_size[0], output_size[1], 2), tensor where entry (i,j) gives the
+        (x, y)-coordinates of the grid point.
+    """
     nv, nu = output_size
     urange = torch.linspace(ulim[0], ulim[1], nu, device=device)
     vrange = torch.linspace(vlim[0], vlim[1], nv, device=device)
@@ -27,6 +55,19 @@ def polar_grid(output_size, ulim=(0, np.sqrt(2.)), vlim=(-np.pi, np.pi), out=Non
 
 
 def logpolar_grid(output_size, ulim=(None, np.log(2.)/2.), vlim=(-np.pi, np.pi), out=None, device=None):
+    """Log-polar coordinate system.
+    
+    Args:
+        output_size: (int, int), number of sampled values for the v-coordinate and u-coordinate respectively
+        ulim: (float, float), radial coordinate limits
+        vlim: (float, float), angular coordinate limits
+        out: torch.FloatTensor, output tensor
+        device: string or torch.device, device for torch.tensor
+        
+    Returns:
+        torch.FloatTensor, shape (output_size[0], output_size[1], 2), tensor where entry (i,j) gives the
+        (x, y)-coordinates of the grid point.
+    """
     nv, nu = output_size
     if ulim[0] is None:
         ulim = (-np.log(nu), ulim[1])
@@ -40,6 +81,19 @@ def logpolar_grid(output_size, ulim=(None, np.log(2.)/2.), vlim=(-np.pi, np.pi),
 
 
 def shearx_grid(output_size, ulim=(-1, 1), vlim=(-5, 5), out=None, device=None):
+    """Horizontal shear coordinate system.
+    
+    Args:
+        output_size: (int, int), number of sampled values for the v-coordinate and u-coordinate respectively
+        ulim: (float, float), Cartesian y-coordinate limits
+        vlim: (float, float), x/y ratio limits
+        out: torch.FloatTensor, output tensor
+        device: string or torch.device, device for torch.tensor
+        
+    Returns:
+        torch.FloatTensor, shape (output_size[0], output_size[1], 2), tensor where entry (i,j) gives the
+        (x, y)-coordinates of the grid point.
+    """
     nv, nu = output_size
     urange = torch.linspace(ulim[0], ulim[1], nu, device=device)
     vrange = torch.linspace(vlim[0], vlim[1], nv, device=device)
@@ -50,6 +104,19 @@ def shearx_grid(output_size, ulim=(-1, 1), vlim=(-5, 5), out=None, device=None):
 
 
 def sheary_grid(output_size, ulim=(-1, 1), vlim=(-5, 5), out=None, device=None):
+    """Vertical shear coordinate system.
+    
+    Args:
+        output_size: (int, int), number of sampled values for the v-coordinate and u-coordinate respectively
+        ulim: (float, float), Cartesian x-coordinate limits
+        vlim: (float, float), y/x ratio limits
+        out: torch.FloatTensor, output tensor
+        device: string or torch.device, device for torch.tensor
+        
+    Returns:
+        torch.FloatTensor, shape (output_size[0], output_size[1], 2), tensor where entry (i,j) gives the
+        (x, y)-coordinates of the grid point.
+    """
     nv, nu = output_size
     urange = torch.linspace(ulim[0], ulim[1], nu, device=device)
     vrange = torch.linspace(vlim[0], vlim[1], nv, device=device)
@@ -60,6 +127,19 @@ def sheary_grid(output_size, ulim=(-1, 1), vlim=(-5, 5), out=None, device=None):
 
 
 def scalex_grid(output_size, ulim=(None, 0), vlim=(-1, 1), out=None, device=None):
+    """Horizontal scale coordinate system.
+    
+    Args:
+        output_size: (int, int), number of sampled values for the v-coordinate and u-coordinate respectively
+        ulim: (float, float), logarithmic x-coordinate limits
+        vlim: (float, float), Cartesian y-coordinate limits 
+        out: torch.FloatTensor, output tensor
+        device: string or torch.device, device for torch.tensor
+        
+    Returns:
+        torch.FloatTensor, shape (output_size[0], output_size[1], 2), tensor where entry (i,j) gives the
+        (x, y)-coordinates of the grid point.
+    """
     nv, nu = output_size
     if ulim[0] is None:
         ulim = (-np.log(nu/2), ulim[1])
@@ -80,6 +160,19 @@ def scalex_grid(output_size, ulim=(None, 0), vlim=(-1, 1), out=None, device=None
 
 
 def scaley_grid(output_size, ulim=(None, 0), vlim=(-1, 1), out=None, device=None):
+    """Vertical scale coordinate system.
+    
+    Args:
+        output_size: (int, int), number of sampled values for the v-coordinate and u-coordinate respectively
+        ulim: (float, float), logarithmic y-coordinate limits
+        vlim: (float, float), Cartesian x-coordinate limits
+        out: torch.FloatTensor, output tensor
+        device: string or torch.device, device for torch.tensor
+        
+    Returns:
+        torch.FloatTensor, shape (output_size[0], output_size[1], 2), tensor where entry (i,j) gives the
+        (x, y)-coordinates of the grid point.
+    """
     nv, nu = output_size
     if ulim[0] is None:
         ulim = (-np.log(nu/2), ulim[1])
@@ -100,6 +193,19 @@ def scaley_grid(output_size, ulim=(None, 0), vlim=(-1, 1), out=None, device=None
 
 
 def hyperbolic_grid(output_size, ulim=(-np.sqrt(0.5), np.sqrt(0.5)), vlim=(-np.log(6.), np.log(6.)), out=None, device=None):
+    """Hyperbolic coordinate system.
+    
+    Args:
+        output_size: (int, int), number of sampled values for the v-coordinate and u-coordinate respectively
+        ulim: (float, float), hyperbolic angular coordinate limits
+        vlim: (float, float), hyperbolic log-radial coordinate limits 
+        out: torch.FloatTensor, output tensor
+        device: string or torch.device, device for torch.tensor
+        
+    Returns:
+        torch.FloatTensor, shape (output_size[0], output_size[1], 2), tensor where entry (i,j) gives the
+        (x, y)-coordinates of the grid point.
+    """
     nv, nu = output_size
     urange = torch.linspace(ulim[0], ulim[1], nu, device=device)
     vrange = torch.linspace(vlim[0], vlim[1], nv//2, device=device)
@@ -119,6 +225,19 @@ def hyperbolic_grid(output_size, ulim=(-np.sqrt(0.5), np.sqrt(0.5)), vlim=(-np.l
 
 
 def perspectivex_grid(output_size, ulim=(1, 8), vlim=(-0.99*np.pi/2, 0.99*np.pi/2), out=None, device=None):
+    """Horizontal perspective coordinate system.
+    
+    Args:
+        output_size: (int, int), number of sampled values for the v-coordinate and u-coordinate respectively
+        ulim: (float, float), x^{-1} "radial" coordinate limits
+        vlim: (float, float), angular coordinate limits
+        out: torch.FloatTensor, output tensor
+        device: string or torch.device, device for torch.tensor
+        
+    Returns:
+        torch.FloatTensor, shape (output_size[0], output_size[1], 2), tensor where entry (i,j) gives the
+        (x, y)-coordinates of the grid point.
+    """
     nv, nu = output_size
     urange = torch.linspace(ulim[0], ulim[1], nu, device=device)
     vrange = torch.linspace(vlim[0], vlim[1], nv//2, device=device)
@@ -139,6 +258,19 @@ def perspectivex_grid(output_size, ulim=(1, 8), vlim=(-0.99*np.pi/2, 0.99*np.pi/
 
 
 def perspectivey_grid(output_size, ulim=(1, 8), vlim=(-0.99*np.pi/2, 0.99*np.pi/2), out=None, device=None):
+    """Vertical perspective coordinate system.
+    
+    Args:
+        output_size: (int, int), number of sampled values for the v-coordinate and u-coordinate respectively
+        ulim: (float, float), y^{-1} "radial" coordinate limits
+        vlim: (float, float), angular coordinate limits
+        out: torch.FloatTensor, output tensor
+        device: string or torch.device, device for torch.tensor
+        
+    Returns:
+        torch.FloatTensor, shape (output_size[0], output_size[1], 2), tensor where entry (i,j) gives the
+        (x, y)-coordinates of the grid point.
+    """
     nv, nu = output_size
     urange = torch.linspace(ulim[0], ulim[1], nu, device=device)
     vrange = torch.linspace(vlim[0], vlim[1], nv//2, device=device)
@@ -159,6 +291,19 @@ def perspectivey_grid(output_size, ulim=(1, 8), vlim=(-0.99*np.pi/2, 0.99*np.pi/
 
 
 def spherical_grid(output_size, ulim=(-np.pi/4, np.pi/4), vlim=(-np.pi/4, np.pi/4), out=None, device=None):
+    """Spherical coordinate system.
+    
+    Args:
+        output_size: (int, int), number of sampled values for the v-coordinate and u-coordinate respectively
+        ulim: (float, float), latitudinal coordinate limits
+        vlim: (float, float), longitudinal coordinate limits 
+        out: torch.FloatTensor, output tensor
+        device: string or torch.device, device for torch.tensor
+        
+    Returns:
+        torch.FloatTensor, shape (output_size[0], output_size[1], 2), tensor where entry (i,j) gives the
+        (x, y)-coordinates of the grid point.
+    """
     nv, nu = output_size
     urange = torch.linspace(ulim[0], ulim[1], nu, device=device)
     vrange = torch.linspace(vlim[0], vlim[1], nv, device=device)

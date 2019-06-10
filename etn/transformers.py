@@ -12,8 +12,11 @@ from .coordinates import *
 class GridTransform(object):
     def __init__(self, transform):
         """
-        Attributes:
-            transform ():
+        A grid-to-grid transformation.
+        
+        Args:
+            transform: Callable, a tensor-to-tensor mapping where the input and output
+            dimensions are both [batch, height, width, 2]
         """
         self.transform = transform
     
@@ -21,17 +24,17 @@ class GridTransform(object):
         """Perform the transformation on a grid.
         
         Args:
-            grid (torch.Tensor): tensor of shape [batch, height, width, 2] denoting
+            grid: torch.Tensor, tensor of shape [batch, height, width, 2] denoting
                 the (x, y) coordinates of each of the height x width grid points
                 for each grid in the batch.
                 
-        Output:
-            A tensor of shape [batch, height, width, 2] representing the transformed
-            grid.
+        Returns:
+            A tensor of shape [batch, height, width, 2] representing the transformed grid.
         """
         return self.transform(grid)
     
     def compose(self, other):
+        """Compose with another transformation"""
         if not isinstance(other, GridTransform):
             raise ValueError('Invalid type')
         return GridTransform(lambda x: self(other(x)))
@@ -40,13 +43,25 @@ class GridTransform(object):
 class ProjectiveGridTransform(GridTransform):
     def __init__(self, transform):
         """
-        Attributes:
-            transform (torch.Tensor):
+        A grid-to-grid projective transformation.
+        
+        Args:
+            transform: torch.Tensor, a tensor with dimensions [batch, 3, 3] representing a collection
+            of projective transformations.
         """
         super().__init__(transform)
     
     def __call__(self, grid):
-        """grid [n, h, w, 2], transform: [n, 3, 3]"""
+        """Perform the transformation on a grid.
+        
+        Args:
+            grid: torch.Tensor, tensor of shape [batch, height, width, 2] denoting
+                the (x, y) coordinates of each of the height x width grid points
+                for each grid in the batch.
+                
+        Returns:
+            A tensor of shape [batch, height, width, 2] representing the transformed grid.
+        """
         n, h, w, _ = grid.shape
         ones = grid.new_ones(n, h, w, 1)
         coords = torch.cat([grid, ones], -1)
@@ -58,6 +73,7 @@ class ProjectiveGridTransform(GridTransform):
         return grid_tf
     
     def compose(self, other):
+        """Compose with another transformation"""
         if isinstance(other, ProjectiveGridTransform):
             new_mat = torch.bmm(self.transform, other.transform)
             return ProjectiveGridTransform(new_mat)
@@ -78,20 +94,19 @@ class Transformer(nn.Module):
         """Transformer module base class. 
         
         Args:
-            predictor_cls: Callable that instantiates an nn.Module instance for predicting 
+            predictor_cls: Callable, instantiates an nn.Module instance for predicting 
                 pose parameters.
-            in_channels (int): Size of channel dimension of input tensor.
-            nf (int): Number of filters for instantiating pose predictor.
-            coords: Callable that
-            ulim (Tuple[float, float]): 
-            vlim (Tuple[float, float]):
-            return_u (bool): Whether to return a prediction for the `u` coordinate.
-            return_v (bool): Whether to return a prediction for the `v` coordinate.
-            periodic_u (bool): Whether the `u` coordinate is periodic.
-            periodic_v (bool): Whether the `v` coordinate is periodic.
-            rescale (bool): Whether to scale the predicted `u` and `v` by half the range
-                of `ulim` and `vlim`. Useful for pose predictors that return values in [-1, 1].
-            kwargs: Additional arguments to be passed to the pose predictor constructor.
+            in_channels: int, Size of channel dimension of input tensor.
+            nf: int, Number of filters for instantiating pose predictor.
+            coords: Callable, coordinate transformation
+            ulim: (float, float), limits of u coordinate
+            vlim: (float, float), limits of v coordinate
+            return_u: bool, whether to return a prediction for the u coordinate.
+            return_v: bool, whether to return a prediction for the v coordinate.
+            periodic_u: bool, whether the u coordinate is periodic.
+            periodic_v: bool, whether the v coordinate is periodic.
+            rescale: bool, whether to scale the predicted u and v by half the range
+                of ulim and vlim. Useful for pose predictors that return values in [-1, 1].
         """
         super().__init__()
         self.coords = coords
@@ -115,26 +130,26 @@ class Transformer(nn.Module):
             **kwargs)
     
     def transform_from_params(self, *params):
-        """Returns a 
-        """
+        """Returns a transformation function from the given parameters"""
         return NotImplemented
     
     def forward(self, x, transform=None, grid_size=None, padding_mode='zeros'):
         """ 
-        
         Args:
-            x (torch.Tensor): Input tensor in NCHW format.
-            transform (GridTransform): A grid-to-grid transformation that takes an input a
+            x: torch.Tensor, Input tensor in NCHW format.
+            transform: GridTransform, a grid-to-grid transformation that takes an input a
                 [H, W, 2]-shaped tensor of x-y coordinates of grid points and outputs
                 a tensor of the same shape. This implicitly represents the transformation
                 applied to the input image before calling the current Transformer module.
-            grid_size (Tuple[int, int]): Shape of the grid used to predict pose parameters.
+            grid_size: (int, int), Shape of the grid used to predict pose parameters.
                 Uses the height and width of the input `x` by default.
-            padding_mode (str, optional): Option from `torch.nn.functional.grid_sample`. 
+            padding_mode: str, option from `torch.nn.functional.grid_sample`. 
                 Valid values are "zeros", "border", and "reflection".
                 
         Return:
-            
+            dict, {'transform': predicted transformation, 
+                   'params': predicted transformation parameters, 
+                   'maps': heatmaps used to predict transformation parameters}
             
         """
         if grid_size is None:
