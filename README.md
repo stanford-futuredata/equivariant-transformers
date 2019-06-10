@@ -131,3 +131,19 @@ model.train(..., show_plot=True, ...)
 
 For more training options, see the `__init__` and `train` functions for the base `experiments.Model` class and its subclasses in `experiment_mnist` and `experiment_svhn`.
 
+---
+
+## Citation
+
+If you've found this repository useful in your own work, please consider citing our paper:
+
+```
+@inproceedings{tai2019equivariant,
+  title={{Equivariant Transformer Networks}},
+  author={Tai, Kai Sheng and Bailis, Peter and Valiant, Gregory},
+  booktitle={International Conference on Machine Learning},
+  year={2019}
+}
+```
+
+
