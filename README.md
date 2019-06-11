@@ -27,13 +27,13 @@ More details can be found in our ICML 2019 paper: https://arxiv.org/abs/1901.113
 
 To download and preprocess datasets, run:
 
-```
+```bash
 python datasets.py projective_mnist --data_dir=<PATH>
 ``` 
 
 for the Projective MNIST dataset, and
 
-```
+```bash
 python datasets.py svhn --data_dir=<PATH>
 ```
 
@@ -50,7 +50,7 @@ Pretrained models can be found in the `pretrained` directory.
 
 These can be loaded by simply setting the `load_path` argument for the corresponding `Model` subclass:
 
-```
+```python
 from experiment_mnist import MNISTModel
 from experiment_svhn import SVHNModel
 
@@ -67,7 +67,7 @@ These scripts come with preset hyperparameters for each task that can be overrid
 
 To train a model on the Projective MNIST dataset, run:
 
-```
+```bash
 python experiment_mnist.py train --train_path <PATH>/train.pt --valid_path <PATH>/valid.pt [--save_path <SAVE_PATH>]
 ```
 
@@ -75,25 +75,25 @@ The `save_path` flag lets us specify a path to save the model that achieves the 
 
 To change the set of transformers used by the model, we can use the `tfs` flag to specify a list of class names from the `etn.transformers` module. For example:
 
-```
+```bash
 python experiment_mnist.py train ... --tfs "[ShearX, HyperbolicRotation]"
 ```
 
 To train a model without any transformers, we can simply set `tfs` to the empty list `[]`:
 
-```
+```bash
 python experiment_mnist.py train ... --tfs []
 ```
 
 We can also set the coordinate transformation that's applied immediately prior to classification by the CNN:
 
-```
+```bash
 python experiment_mnist.py train ... --coords logpolar
 ```
 
 Therefore, to train a bare-bones model without any transformer layers or coordinate transformations, we can run:
 
-```
+```bash
 python experiment_mnist.py train ... --tfs [] --coords identity
 ```
 
@@ -101,19 +101,19 @@ Feel free to play around with different combinations of transformers and coordin
 
 To train a non-equivariant model, we can set the `equivariant` flag to `False`:
 
-```
+```bash
 python experiment_mnist.py train ... --equivariant False
 ```
 
 To change the device used for training, we can set the `device` flag (this is set to `cuda:0`) by default:
 
-```
+```bash
 python experiment_mnist.py train ... --device cuda:1
 ```
 
 To evaluate a saved model on the test set, run:
 
-```
+```bash
 python experiment_mnist.py --load_path <SAVE_PATH> test --test_path <PATH>/test.pt
 ```
 
@@ -123,7 +123,7 @@ These scripts can also be called from a Jupyter Notebook by importing the `MNIST
 In a notebook, we can visualize training progress using the `show_plot` parameter.
 This produces a live plot of the loss and validation error as training progresses.
 
-```
+```python
 from experiment_mnist import MNISTModel
 model = MNISTModel(...)
 model.train(..., show_plot=True, ...)
